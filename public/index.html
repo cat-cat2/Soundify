@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Soundify</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <h1 class="title">Soundify</h1>
+    <div class="auth-buttons">
+      <a href="login.html" class="btn" id="loginBtn">Login</a>
+      <a href="register.html" class="btn primary" id="registerBtn">Register</a>
+      <a href="logout.html" class="btn" id="logoutBtn">Logout</a>
+      <a href="settings.html" class="btn">Settings</a>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="media">
+      <h2 class="songtitle">Sun Rise by Halvorsen and More Plastic</h2>
+      <audio src="sounds/sunrise.mp3" controls preload="metadata" playsinline>
+        Sun Rise by Halvorsen and More Plastic
+      </audio>
+      <div class="row">
+        <a class="btn primary" href="https://www.youtube.com/watch?v=QUsg4kgvwBo" target="_blank">Open on YouTube</a>
+        <a class="btn" href="downloads/sunrise.mp3" download="SunRise.mp3">Download MP3</a>
+      </div>
+      <!-- Comments -->
+      <div id="commentsSection" style="margin-top:20px; display:none;">
+        <h3>Comments</h3>
+        <form id="commentForm">
+          <textarea id="commentText" placeholder="Write your comment..." required></textarea>
+          <button type="submit" class="btn primary" style="margin-top:8px;">Post Comment</button>
+        </form>
+        <div id="commentList" style="margin-top:12px;"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+  const loggedIn = localStorage.getItem("loggedIn") === "true";
+  document.getElementById("loginBtn").style.display = loggedIn ? "none" : "inline-block";
+  document.getElementById("registerBtn").style.display = loggedIn ? "none" : "inline-block";
+  document.getElementById("logoutBtn").style.display = loggedIn ? "inline-block" : "none";
+
+  const commentsSection = document.getElementById("commentsSection");
+  if(loggedIn){
+    commentsSection.style.display = "block";
+    loadComments();
+  }
+
+  document.getElementById("commentForm")?.addEventListener("submit", e => {
+    e.preventDefault();
+    const text = document.getElementById("commentText").value.trim();
+    if(!text) return;
+    fetch("/comment", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ song:"sunrise.mp3", comment:text, username: localStorage.getItem("username") })
+    }).then(r=>r.json()).then(res=>{
+      if(res.success){
+        document.getElementById("commentText").value = "";
+        loadComments();
+      }
+    });
+  });
+
+  function loadComments(){
+    fetch(`/comments?song=sunrise.mp3`)
+      .then(r=>r.json())
+      .then(comments=>{
+        const list = document.getElementById("commentList");
+        list.innerHTML = comments.map(c=>`<div class="meta"><b>${c.username}:</b> ${c.text}</div>`).join("");
+      });
+  }
+  if(localStorage.getItem('theme')==='light'){ document.body.classList.add('light'); }
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Register – Soundify</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="hero"><h1 class="title">Register</h1></header>
+  <section class="card">
+    <form onsubmit="handleRegister(event)" class="media">
+      <input type="text" name="username" placeholder="Username" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit" class="btn primary">Register</button>
+    </form>
+    <p class="meta">Already have an account? <a href="login.html">Login</a>.</p>
+  </section>
+</main>
+<script>
+function handleRegister(e){
+  e.preventDefault();
+  const form = e.target;
+  fetch("/register", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username: form.username.value,
+      password: form.password.value,
+      email: form.email.value
+    })
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    if(res.success){
+      localStorage.setItem("loggedIn","true");
+      localStorage.setItem("username", form.username.value);
+      location.href="index.html";
+    } else {
+      alert(res.error || "Error registering");
+    }
+  });
+}
+if(localStorage.getItem('theme')==='light'){
+  document.body.classList.add('light');
+}
+</script>
+</body>
+</html>
